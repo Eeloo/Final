@@ -23,38 +23,57 @@ bot.on("message", message => {
     command = command.slice(config.prefix.length);
     
     let args = message.content.split(" ").slice(1);
-
-     if (command === 'version') {
-    message.channel.sendMessage("", {embed: {
-    color: 3447003,
-    author: {
-      name: bot.user.username,
-      icon_url: bot.user.avatarURL
-    },
-    title: 'This is an embed',
-    url: 'http://google.com',
-    description: 'This is a test embed to showcase what they look like and what they can do.',
-    fields: [
-      {
-        name: 'Fields',
-        value: 'They can have different fields with small headlines.'
-      },
-      {
-        name: 'Masked links',
-        value: 'You can put [masked links](http://google.com) inside of rich embeds.'
-      },
-      {
-        name: 'Markdown',
-        value: 'You can put all the *usual* **__Markdown__** inside of them.'
-      }
-    ],
-    timestamp: new Date(),
-    footer: {
-      icon_url: bot.user.avatarURL,
-      text: '© Example'
-      }
-    }});
+    
+    if (command === 'embed') {
+        message.channel.sendMessage("", {embed: {
+            color: 3447003,
+            author: {
+                name: bot.user.username,
+                icon_url: bot.user.avatarURL
+            },
+            title: 'This is an embed',
+            url: 'http://google.com',
+            description: 'This is a test embed to showcase what they look like and what they can do.',
+            fields: [
+                {
+                    name: 'Fields',
+                    value: 'They can have different fields with small headlines.'
+                },
+                {
+                name: 'Masked links',
+                value: 'You can put [masked links](http://google.com) inside of rich embeds.'
+                },
+                {
+                name: 'Markdown',
+                value: 'You can put all the *usual* **__Markdown__** inside of them.'
+                }
+            ],
+            timestamp: new Date(),
+            footer: {
+                icon_url: bot.user.avatarURL,
+                text: '© Example'
+            }
+        }});
   }
+
+    if (command === "purge") {
+
+        let adminRole = message.guild.roles.find("name", config.adminrole);
+        if(message.member.roles.has(adminRole.id)) {
+
+            let numberToDelete = parseInt(args[0]);
+            if (!numberToDelete || numberToDelete<0) {
+                message.channel.sendMessage("That is not a valid number!");
+                return;
+            }
+            message.channel.bulkDelete(numberToDelete);
+
+        }
+
+        else {
+            message.channel.sendMessage(`I'm sorry ${message.member.user}, you don't have that permission!`);
+        }
+    }
 
     if (command === "quote") {
         let originalMessage = message
@@ -76,9 +95,9 @@ bot.on("message", message => {
                         }
                     }
                 });
+                originalMessage.delete();
         }
         );
-        message.delete();
     }
 
     if (command === "announce") {
@@ -125,21 +144,45 @@ bot.on("message", message => {
     }
 
     if (command === "info") {
-        message.channel.sendMessage("Envision Information", {
+        let message1 = message;
+        message.channel.sendMessage("Pinging").then(message => {
+                    message.edit("", {
                 embed: {
-                    color: 987654,
+                    color: 987,
                     author: {
                         name: bot.user.username,
                         icon_url: bot.user.avatarURL
                         },
-                    title: "Commands:",
-                    description: "!quote\nQuotes a message based on its id.\nUsage: !quote <messageID>\nTODO",
+                    title: "Envision Information",
+                    description: "Main Info Page for Envision.",
+                    fields: [
+                        {
+                            name: 'Current Heartbeat Ping',
+                            value: bot.ping,
+                            inline: true
+                        },
+                        {
+                            name: 'Admin Commands',
+                            value: 'todo',
+                            inline: true
+                        },
+                        {
+                            name: 'Commands',
+                            value: 'todo',
+                            inline: true
+                        },
+                        {
+                            name: 'Roundtrip Time',
+                            value: `${message.createdTimestamp-message1.createdTimestamp} milliseconds.`
+                        }
+                    ],
                     timestamp: new Date(),
                     footer: {
                         icon_url: bot.user.avatarURL,
-                        text: `Online for ${message.createdTimestamp-bot.readyTimestamp} milliseconds, current ping: ${bot.ping}.`
+                        text: `Online for ${message.createdTimestamp-bot.readyTimestamp} milliseconds.`
                         }
                     }
+                });
                 });
     }
 
@@ -312,6 +355,7 @@ bot.on('error', e => { console.error(e); });
 bot.on('ready', () => {
   console.log('I am ready!');
   let guild = bot.guilds.get("243530171976646657");
+  bot.user.setGame("Surveillance Footage")
 });
 
 bot.login(config.token);
